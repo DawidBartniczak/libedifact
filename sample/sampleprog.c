@@ -32,5 +32,10 @@ char* edi_data =    "UNA:+.? '"
                     "UNZ+1+536'";
 
 int main(int argc, char** argv){
-    printf("Hello from!\n%d\n", parse_edi(edi_data));
+    edi_parser_t* parser = edi_parser_create(200);
+
+    printf("Parser created\n%d", parser->auto_detect_params);
+
+    edi_parser_destroy(parser);
+    return 0;
 }
