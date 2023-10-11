@@ -13,21 +13,7 @@ edi_parser_params_t* _edi_parser_params_alloc() {
 }
 
 edi_parser_params_t* edi_parser_params_default() {
-    edi_parser_params_t *params;
-
-    if((params = _edi_parser_params_alloc()) == NULL) {
-        return NULL;
-    }
-
-    params->segment_terminator = '\'';
-    params->element_sep = '+';
-    params->subelement_sep = ':';
-    params->decimal_notation = '.';
-    params->release_char = '?';
-    params->interchange_header_tag = "UNB";
-    params->interchange_trailer_tag = "UNZ";
-
-    return params;
+    return edi_parser_params_create('\'', '+', ':', '.', '?');
 }
 
 edi_parser_params_t* edi_parser_params_create(char segment_t, char element_s, char selement_t, char decimal, char release) {
@@ -71,4 +57,20 @@ edi_parser_t* edi_parser_create(edi_parser_params_t* params) {
 
 void edi_parser_destroy(edi_parser_t* parser) {
     free(parser);
+}
+
+// INTERCHANGE FACTORY
+
+edi_interchange_t* edi_interchange_create() {
+    edi_interchange_t* interchange;
+
+    if((interchange = (edi_interchange_t *) calloc(1, sizeof(edi_interchange_t))) == NULL) {
+        return NULL;
+    }
+
+    return interchange;
+}
+
+void edi_interchange_destroy(edi_interchange_t* interchange) {
+    free(interchange);
 }

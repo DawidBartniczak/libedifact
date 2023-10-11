@@ -32,6 +32,18 @@ char* edi_data =    "UNA:+.! '"
                     "UNZ+1+536'";
 
 int main(int argc, char** argv){
-    edi_parse(NULL, edi_data, sizeof(edi_data));
+    edi_interchange_t *edi_interchange = edi_parse(NULL, edi_data);
+
+    if (edi_interchange->error != EDI_ERROR_NONE) {
+        printf("Error parsing EDI data\n");
+        return 1;
+    } else {
+        for (int i = 0; i < edi_interchange->segment_count; i++) {
+            edi_segment_t *edi_segment = edi_interchange->segments + i;
+            printf("%s %d\n", edi_segment->tag, (int)edi_segment->element_count);
+        }
+    }
+
+    edi_interchange_destroy(edi_interchange);
     return 0;
 }

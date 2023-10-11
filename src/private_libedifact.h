@@ -1,6 +1,8 @@
 #ifndef _PV_LIBEDIFACT_H
     #define _PV_LIBEDIFACT_H
 
+    #define EDI_SEGMENT_CLUSTER_SIZE 4
+
     #include <stdlib.h>
     #include <string.h>
     #include <stddef.h>
@@ -8,18 +10,10 @@
 
     typedef struct edi_parser edi_parser_t;
 
-    struct edi_parser_params {
-        char segment_terminator;
-        char element_sep;
-        char subelement_sep;
-        char decimal_notation;
-        char release_char;
-
-        const char* interchange_header_tag;
-        const char* interchange_trailer_tag;
+    struct edi_parser {
+        int error;
+        edi_parser_params_t* params;
     };
-
-    edi_parser_params_t* _detect_edi_params(char*);
 
     edi_parser_params_t* edi_parser_params_default();
     edi_parser_params_t* edi_parser_params_create(char, char, char, char, char);
