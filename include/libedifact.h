@@ -21,17 +21,14 @@
     #define EDI_ERROR_NTERMINATED 2
     #define EDI_ERROR_GENERAL 3
 
-    typedef struct edi_parser edi_parser_t;
     typedef struct edi_interchange edi_interchange_t;
     typedef struct edi_segment edi_segment_t;
     typedef struct edi_element edi_element_t;
-    typedef struct edi_service_string_detector edi_service_string_detector_t;
     typedef struct edi_parser_params edi_parser_params_t;
 
     struct edi_parser {
         int error;
         edi_parser_params_t* params;
-        int auto_detect_params;
     };
 
     struct edi_interchange {
@@ -50,6 +47,5 @@
         size_t subelement_count;
     };
 
-    PUBLISHED edi_parser_t* edi_parser_create(int);
-    PUBLISHED int edi_parser_destroy(edi_parser_t* parser);
+    PUBLISHED edi_interchange_t* edi_parse(edi_parser_params_t*, char*, size_t);
 #endif

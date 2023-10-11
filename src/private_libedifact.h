@@ -1,9 +1,12 @@
 #ifndef _PV_LIBEDIFACT_H
     #define _PV_LIBEDIFACT_H
 
-    #include "libedifact.h"
     #include <stdlib.h>
+    #include <string.h>
     #include <stddef.h>
+    #include "libedifact.h"
+
+    typedef struct edi_parser edi_parser_t;
 
     struct edi_parser_params {
         char segment_terminator;
@@ -12,15 +15,16 @@
         char decimal_notation;
         char release_char;
 
-        const char* header_tag;
-        const char* trailer_tag;
+        const char* interchange_header_tag;
+        const char* interchange_trailer_tag;
     };
 
-    struct edi_service_string_detector {
-        char* service_string;
-        size_t service_string_position;
-        unsigned char service_string_found;
-    };
+    edi_parser_params_t* _detect_edi_params(char*);
 
-    edi_parser_t* edi_parser_create();
+    edi_parser_params_t* edi_parser_params_default();
+    edi_parser_params_t* edi_parser_params_create(char, char, char, char, char);
+    void edi_parser_params_destroy(edi_parser_params_t*);
+
+    edi_parser_t* edi_parser_create(edi_parser_params_t*);
+    void edi_parser_destroy(edi_parser_t* parser);
 #endif

@@ -2,7 +2,7 @@
 
 #include "libedifact.h"
 
-char* edi_data =    "UNA:+.? '"
+char* edi_data =    "UNA:+.! '"
                     "UNB+UNOC:3+30-051-2308:ZZ+yourDUNS:14+230417:1443+536'"
                     "UNH+1+ORDRSP:D:96A:UN'"
                     "BGM+231+2001710702'"
@@ -32,10 +32,6 @@ char* edi_data =    "UNA:+.? '"
                     "UNZ+1+536'";
 
 int main(int argc, char** argv){
-    edi_parser_t* parser = edi_parser_create(200);
-
-    printf("Parser created\n%d", parser->auto_detect_params);
-
-    edi_parser_destroy(parser);
+    edi_parse(NULL, edi_data, sizeof(edi_data));
     return 0;
 }
