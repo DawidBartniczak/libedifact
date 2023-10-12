@@ -40,7 +40,17 @@ int main(int argc, char** argv){
     } else {
         for (int i = 0; i < edi_interchange->segment_count; i++) {
             edi_segment_t *edi_segment = edi_interchange->segments + i;
-            printf("%s %d\n", edi_segment->tag, (int)edi_segment->element_count);
+            printf("%s ", edi_segment->tag);
+
+            for (int j = 0; j < edi_segment->element_count; j++) {
+                edi_element_t *edi_element = edi_segment->elements + j;
+                for (int k = 0; k < edi_element->subelement_count; k++) {
+                    char *edi_subelement = edi_element->subelements[k];
+                    printf("%s ", edi_subelement);
+                }
+            }
+
+            printf("\n");
         }
     }
 

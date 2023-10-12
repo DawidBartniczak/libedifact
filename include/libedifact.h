@@ -58,4 +58,6 @@
 
     PUBLISHED edi_interchange_t* edi_interchange_create();
     PUBLISHED void edi_interchange_destroy(edi_interchange_t*);
+
+    PUBLISHED edi_parser_params_t* edi_parser_params_create(char, char, char, char, char);
 #endif

@@ -104,6 +104,18 @@ edi_element_t* edi_parser_next_element(edi_parser_t* parser) {
     return parser->private->current_element;
 }
 
+char* edi_parser_next_subelement(edi_parser_t* parser) {
+    parser->private->allocated_subelements++;
+    if ((parser->private->current_element->subelements = realloc(parser->private->current_element->subelements, sizeof(char*) * parser->private->allocated_subelements)) == NULL) {
+        return NULL;
+    }
+    parser->private->current_subelement = parser->private->current_element->subelements + parser->private->current_element->subelement_count;
+    parser->private->current_element->subelement_count++;
+    memset(parser->private->current_subelement, 0, sizeof(char *));
+
+    return parser->private->current_subelement;
+}
+
 void edi_parser_destroy(edi_parser_t* parser) {
     free(parser->private->buffer);
     free(parser->private);

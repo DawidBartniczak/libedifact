@@ -25,6 +25,7 @@
         edi_interchange_t* current_interchange;
         edi_segment_t* current_segment;
         edi_element_t* current_element;
+        char* current_subelement;
 
         size_t allocated_segments;
         size_t allocated_elements;
@@ -32,11 +33,13 @@
     };
 
     edi_parser_params_t* edi_parser_params_default();
-    edi_parser_params_t* edi_parser_params_create(char, char, char, char, char);
     void edi_parser_params_destroy(edi_parser_params_t*);
 
     edi_parser_t* edi_parser_create(edi_parser_params_t*, size_t);
     edi_segment_t* edi_parser_next_segment(edi_parser_t*);
     edi_element_t* edi_parser_next_element(edi_parser_t*);
+    char* edi_parser_next_subelement(edi_parser_t*);
     void edi_parser_destroy(edi_parser_t* parser);
+
+    char* create_dynamic_string(char*, size_t);
 #endif

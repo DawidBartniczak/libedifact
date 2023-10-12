@@ -8,6 +8,17 @@ edi_parser_params_t* _detect_edi_params(char* data) {
     return edi_parser_params_create(data[8], data[4], data[3], data[5], data[6]);
 }
 
+char* _save_buffer_to_subelement(edi_parser_t* parser) {
+    if (edi_parser_next_subelement(parser) == NULL) {
+        return NULL;
+    }
+
+    parser->private->current_element->subelements[parser->private->current_element->subelement_count - 1] = create_dynamic_string(parser->private->buffer, parser->private->buffer_length);
+    parser->private->buffer_length = 0;
+
+    return parser->private->current_subelement;
+}
+
 edi_interchange_t* _parse_edi_interchange(edi_parser_t* parser, char* data) {
     if (edi_parser_next_segment(parser) == NULL) {
         edi_interchange_destroy(parser->private->current_interchange);
@@ -15,11 +26,13 @@ edi_interchange_t* _parse_edi_interchange(edi_parser_t* parser, char* data) {
         return NULL;
     }
     strncpy_s(parser->private->current_segment->tag, 4, data, 3);
+    data += 4;
     while(data && *data) {
         if (*data == parser->params->release_char) {
             data++;
         } else {
             if (*data == parser->params->segment_terminator) {
+                _save_buffer_to_subelement(parser);
                 if (strncmp(parser->private->current_segment->tag, parser->params->interchange_trailer_tag, 3) == 0) {
                     break;
                 }
@@ -30,9 +43,12 @@ edi_interchange_t* _parse_edi_interchange(edi_parser_t* parser, char* data) {
                     return NULL;
                 }
                 
-                data++;
-                strncpy_s(parser->private->current_segment->tag, 4, data, 3);
+                strncpy_s(parser->private->current_segment->tag, 4, data + 1, 3);
+                data += 5;
+
+                continue;
             } else if (*data == parser->params->element_sep) {
+                _save_buffer_to_subelement(parser);
                 if (edi_parser_next_element(parser) == NULL) {
                     edi_interchange_destroy(parser->private->current_interchange);
                     edi_parser_destroy(parser);
@@ -40,10 +56,18 @@ edi_interchange_t* _parse_edi_interchange(edi_parser_t* parser, char* data) {
                 }
 
                 data++;
+
+                continue;
             } else if (*data == parser->params->subelement_sep) {
+                _save_buffer_to_subelement(parser);
+
                 data++;
+
+                continue;
             }
         }
+
+        parser->private->buffer[parser->private->buffer_length++] = *data;
 
         data++;
     }
