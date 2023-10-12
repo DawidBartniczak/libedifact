@@ -33,8 +33,9 @@ edi_interchange_t* edi_parse(edi_parser_params_t* params, char* data) {
         return NULL;
     }
 
-    size_t allocated_segments = 0;
+    size_t allocated_segments = 0, allocated_elements = 0;
     edi_segment_t* current_segment;
+    edi_element_t* current_element;
     unsigned char new_segment = 0, new_element = 0, new_subelement = 0;
     while (data && *data)
     {
@@ -45,8 +46,10 @@ edi_interchange_t* edi_parse(edi_parser_params_t* params, char* data) {
             }
         }
         current_segment = interchange->segments + interchange->segment_count;
+        interchange->segment_count++;
         memset(current_segment, 0, sizeof(edi_segment_t));
         new_segment = 1;
+        allocated_elements = 0;
 
         if (*data == params->segment_terminator)
             data++;
@@ -57,15 +60,29 @@ edi_interchange_t* edi_parse(edi_parser_params_t* params, char* data) {
                 new_segment = 0;
             }
 
+            if (current_segment->element_count >= allocated_elements) {
+                allocated_elements += EDI_ELEMENT_CLUSTER_SIZE;
+                if ((current_segment->elements = realloc(current_segment->elements, allocated_elements * sizeof(edi_element_t))) == NULL) {
+                    return NULL;
+                }
+            }
+            current_element = current_segment->elements + current_segment->element_count;
+            memset(current_element, 0, sizeof(edi_element_t));
+            current_segment->element_count += 1;
+
             if (*data == params->element_sep)
                 data++;
             while (*data && *data != params->element_sep && *data != params->segment_terminator) {
-                data++;
+                current_element->subelement_count++;
+
+                if (*data == params->subelement_sep)
+                    data++;
+                while (*data && *data != params->subelement_sep && *data != params->segment_terminator && *data != params->element_sep) {
+                    data++;
+                }
             }
-            current_segment->element_count++;
         }
 
-        interchange->segment_count++;
         if (strncmp(current_segment->tag, params->interchange_trailer_tag, 3) == 0) {
             break;
         }

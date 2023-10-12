@@ -2,6 +2,7 @@
     #define _PV_LIBEDIFACT_H
 
     #define EDI_SEGMENT_CLUSTER_SIZE 4
+    #define EDI_ELEMENT_CLUSTER_SIZE 2
 
     #include <stdlib.h>
     #include <string.h>
