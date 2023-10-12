@@ -40,22 +40,73 @@ void edi_parser_params_destroy(edi_parser_params_t* params) {
 
 // PARSER FACTORY
 
-edi_parser_t* edi_parser_create(edi_parser_params_t* params) {
+edi_parser_t* edi_parser_create(edi_parser_params_t* params, size_t data_length) {
     edi_parser_t* parser;
-
-    if((parser = (edi_parser_t *) calloc(1, sizeof(edi_parser_t))) == NULL) {
-        return NULL;
-    }
+    edi_parser_private_t* private;
+    char* buffer;
 
     if(params == NULL) {
         return NULL;
     }
+
+    if((parser = (edi_parser_t *) calloc(1, sizeof(edi_parser_t))) == NULL) {
+        return NULL;
+    }
+    if((private = (edi_parser_private_t *) calloc(1, sizeof(edi_parser_private_t))) == NULL) {
+        free(parser);
+        return NULL;
+    }
+    if((buffer = (char *) calloc(data_length + 1, sizeof(char))) == NULL) {
+        free(parser);
+        free(private);
+        return NULL;
+    }
+    parser->private = private;
+    parser->private->buffer = buffer;
+
     parser->params = params;
 
     return parser;
 }
 
+edi_segment_t* edi_parser_next_segment(edi_parser_t* parser) {
+    if (parser->private->current_interchange->segment_count >= parser->private->allocated_segments) {
+        parser->private->allocated_segments += EDI_SEGMENT_CLUSTER_SIZE;
+        if ((parser->private->current_interchange->segments = realloc(parser->private->current_interchange->segments, sizeof(edi_segment_t) * parser->private->allocated_segments)) == NULL) {
+            return NULL;
+        }
+    }
+    parser->private->current_segment = parser->private->current_interchange->segments + parser->private->current_interchange->segment_count;
+    parser->private->current_interchange->segment_count++;
+    parser->private->allocated_elements = 0;
+    memset(parser->private->current_segment, 0, sizeof(edi_segment_t));
+
+    if (edi_parser_next_element(parser) == NULL) {
+        free(parser->private->current_segment);
+        return NULL;
+    }
+
+    return parser->private->current_segment;
+}
+
+edi_element_t* edi_parser_next_element(edi_parser_t* parser) {
+    if (parser->private->current_segment->element_count >= parser->private->allocated_elements) {
+        parser->private->allocated_elements += EDI_ELEMENT_CLUSTER_SIZE;
+        if ((parser->private->current_segment->elements = realloc(parser->private->current_segment->elements, sizeof(edi_element_t) * parser->private->allocated_elements)) == NULL) {
+            return NULL;
+        }
+    }
+    parser->private->current_element = parser->private->current_segment->elements + parser->private->current_segment->element_count;
+    parser->private->current_segment->element_count++;
+    parser->private->allocated_subelements = 0;
+    memset(parser->private->current_element, 0, sizeof(edi_element_t));
+
+    return parser->private->current_element;
+}
+
 void edi_parser_destroy(edi_parser_t* parser) {
+    free(parser->private->buffer);
+    free(parser->private);
     free(parser);
 }
 

@@ -18,6 +18,7 @@
 
     #define EDI_ERROR_NONE 0
     #define EDI_ERROR_EMPTY 1
+    #define EDI_ERROR_SYS 2
 
     typedef struct edi_interchange edi_interchange_t;
     typedef struct edi_segment edi_segment_t;

@@ -10,16 +10,33 @@
     #include "libedifact.h"
 
     typedef struct edi_parser edi_parser_t;
+    typedef struct edi_parser_private edi_parser_private_t;
 
     struct edi_parser {
         int error;
+        edi_parser_private_t* private;
         edi_parser_params_t* params;
+    };
+
+    struct edi_parser_private {
+        char* buffer;
+        size_t buffer_length;
+
+        edi_interchange_t* current_interchange;
+        edi_segment_t* current_segment;
+        edi_element_t* current_element;
+
+        size_t allocated_segments;
+        size_t allocated_elements;
+        size_t allocated_subelements;
     };
 
     edi_parser_params_t* edi_parser_params_default();
     edi_parser_params_t* edi_parser_params_create(char, char, char, char, char);
     void edi_parser_params_destroy(edi_parser_params_t*);
 
-    edi_parser_t* edi_parser_create(edi_parser_params_t*);
+    edi_parser_t* edi_parser_create(edi_parser_params_t*, size_t);
+    edi_segment_t* edi_parser_next_segment(edi_parser_t*);
+    edi_element_t* edi_parser_next_element(edi_parser_t*);
     void edi_parser_destroy(edi_parser_t* parser);
 #endif
