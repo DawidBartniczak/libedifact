@@ -2,7 +2,7 @@
 
 #include "libedifact.h"
 
-char* edi_data =    "UNA:+.? '"
+char* edi_data =    "UNA:+.! '"
                     "UNB+UNOC:3+30-051-2308:ZZ+yourDUNS:14+230417:1443+536'"
                     "UNH+1+ORDRSP:D:96A:UN'"
                     "BGM+231+2001710702'"
@@ -13,7 +13,7 @@ char* edi_data =    "UNA:+.? '"
                     "NAD+SU+30-051-2308::91'"
                     "NAD+BY+yourDUNS::91'"
                     "CUX+2:EUR:9'"
-                    "LIN+10++MXQ8-10-X2480:SA'"
+                    "LIN+10++MXQ8-10-X2!'480:SA'"
                     "PIA+1+03328262:BP'"
                     "QTY+12:2:PCE'"
                     "DTM+55:20230522:102'"
@@ -32,5 +32,28 @@ char* edi_data =    "UNA:+.? '"
                     "UNZ+1+536'";
 
 int main(int argc, char** argv){
-    printf("Hello from!\n%d\n", parse_edi(edi_data));
+    edi_interchange_t *edi_interchange = edi_parse(NULL, edi_data);
+
+    if (edi_interchange->error != EDI_ERROR_NONE) {
+        printf("Error parsing EDI data\n");
+        return 1;
+    } else {
+        for (int i = 0; i < edi_interchange->segment_count; i++) {
+            edi_segment_t *edi_segment = edi_interchange->segments + i;
+            printf("%s ", edi_segment->tag);
+
+            for (int j = 0; j < edi_segment->element_count; j++) {
+                edi_element_t *edi_element = edi_segment->elements + j;
+                for (int k = 0; k < edi_element->subelement_count; k++) {
+                    char *edi_subelement = edi_element->subelements[k];
+                    printf("%s ", edi_subelement);
+                }
+            }
+
+            printf("\n");
+        }
+    }
+
+    edi_interchange_destroy(edi_interchange);
+    return 0;
 }
