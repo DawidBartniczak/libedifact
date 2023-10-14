@@ -109,7 +109,7 @@ char* edi_parser_next_subelement(edi_parser_t* parser) {
     if ((parser->private->current_element->subelements = realloc(parser->private->current_element->subelements, sizeof(char*) * parser->private->allocated_subelements)) == NULL) {
         return NULL;
     }
-    parser->private->current_subelement = parser->private->current_element->subelements + parser->private->current_element->subelement_count;
+    parser->private->current_subelement = (char*)(parser->private->current_element->subelements + parser->private->current_element->subelement_count);
     parser->private->current_element->subelement_count++;
     memset(parser->private->current_subelement, 0, sizeof(char *));
 
@@ -134,6 +134,25 @@ edi_interchange_t* edi_interchange_create() {
     return interchange;
 }
 
+void edi_element_destroy(edi_element_t* element) {
+    for (size_t i = 0; i < element->subelement_count; i++) {
+        free(element->subelements[i]);
+    }
+    free(element->subelements);
+}
+
+void edi_segment_destroy(edi_segment_t* segment) {
+    for (size_t i = 0; i < segment->element_count; i++) {
+        edi_element_destroy(&segment->elements[i]);
+    }
+    free(segment->elements);
+}
+
 void edi_interchange_destroy(edi_interchange_t* interchange) {
+    edi_segment_t* segment = interchange->segments;
+    for (size_t i = 0; i < interchange->segment_count; i++) {
+        edi_segment_destroy(&interchange->segments[i]);
+    }
+    free(interchange->segments);
     free(interchange);
 }

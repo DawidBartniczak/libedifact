@@ -39,7 +39,11 @@
     edi_segment_t* edi_parser_next_segment(edi_parser_t*);
     edi_element_t* edi_parser_next_element(edi_parser_t*);
     char* edi_parser_next_subelement(edi_parser_t*);
-    void edi_parser_destroy(edi_parser_t* parser);
+    void edi_parser_destroy(edi_parser_t*);
+
+    void edi_element_destroy(edi_element_t*);
+
+    void edi_segment_destroy(edi_segment_t*);
 
     char* create_dynamic_string(char*, size_t);
 #endif
