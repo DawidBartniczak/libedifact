@@ -80,6 +80,9 @@ edi_interchange_t* _parse_edi_interchange(edi_parser_t* parser, char* data) {
         } else {
             if (*data == parser->params->segment_terminator) {
                 _save_buffer_to_subelement(parser);
+                if (strncmp(parser->private->current_segment->tag, parser->params->message_header_tag, 3) == 0) {
+                    strncpy_s(parser->private->current_interchange->message_type, 7, parser->private->current_element->subelements[0], 6);
+                }
                 if (strncmp(parser->private->current_segment->tag, parser->params->interchange_trailer_tag, 3) == 0) {
                     break;
                 }
@@ -125,7 +128,7 @@ edi_interchange_t* _parse_edi_interchange(edi_parser_t* parser, char* data) {
 edi_interchange_t* edi_parse(edi_parser_params_t* params, char* data) {
     edi_interchange_t* interchange;
     edi_parser_t* parser;
-    unsigned char destroy_parser = 0;
+    unsigned char destroy_params = 0;
 
     if((interchange = edi_interchange_create()) == NULL) {
         return NULL;
@@ -136,7 +139,7 @@ edi_interchange_t* edi_parse(edi_parser_params_t* params, char* data) {
     }
 
     if(params == NULL) {
-        destroy_parser = 1;
+        destroy_params = 1;
         if ((params = _detect_edi_params(data)) != NULL) {
             data += 9;
         } else if ((params = edi_parser_params_default()) == NULL) {
@@ -154,7 +157,7 @@ edi_interchange_t* edi_parse(edi_parser_params_t* params, char* data) {
     }
     
     edi_parser_destroy(parser);
-    if(destroy_parser != 0) {
+    if(destroy_params != 0) {
         edi_parser_params_destroy(params);
     }
     return interchange;

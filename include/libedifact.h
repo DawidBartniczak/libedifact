@@ -32,7 +32,7 @@
         char decimal_notation;
         char release_char;
 
-        const char* interchange_header_tag;
+        const char* message_header_tag;
         const char* interchange_trailer_tag;
     };
 
@@ -55,6 +55,8 @@
     };
 
     PUBLISHED edi_interchange_t* edi_parse(edi_parser_params_t*, char*);
+
+    PUBLISHED char* edi_generate(edi_parser_params_t*, edi_interchange_t*);
 
     PUBLISHED edi_interchange_t* edi_interchange_create();
     PUBLISHED void edi_interchange_destroy(edi_interchange_t*);

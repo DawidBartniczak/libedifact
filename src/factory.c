@@ -28,7 +28,7 @@ edi_parser_params_t* edi_parser_params_create(char segment_t, char element_s, ch
     params->subelement_sep = selement_t;
     params->decimal_notation = decimal;
     params->release_char = release;
-    params->interchange_header_tag = "UNB";
+    params->message_header_tag = "UNH";
     params->interchange_trailer_tag = "UNZ";
 
     return params;
@@ -73,6 +73,44 @@ void edi_parser_destroy(edi_parser_t* parser) {
     free(parser->private->buffer);
     free(parser->private);
     free(parser);
+}
+
+// GENERATOR FACTORY
+
+edi_generator_t* edi_generator_create(edi_parser_params_t* params) {
+    edi_generator_t* generator;
+    edi_generator_private_t* private;
+    char* buffer;
+
+    if(params == NULL) {
+        return NULL;
+    }
+
+    if((generator = (edi_generator_t *) calloc(1, sizeof(edi_generator_t))) == NULL) {
+        return NULL;
+    }
+    if((private = (edi_generator_private_t *) calloc(1, sizeof(edi_generator_private_t))) == NULL) {
+        free(generator);
+        return NULL;
+    }
+    if((buffer = (char *) calloc(EDI_GENERATOR_BUFFER_SIZE, sizeof(char))) == NULL) {
+        free(generator);
+        free(private);
+        return NULL;
+    }
+    generator->private = private;
+    generator->private->buffer = buffer;
+    generator->private->buffer_allocated = EDI_GENERATOR_BUFFER_SIZE;
+
+    generator->params = params;
+
+    return generator;
+}
+
+void edi_generator_destroy(edi_generator_t* generator) {
+    free(generator->private->buffer);
+    free(generator->private);
+    free(generator);
 }
 
 // INTERCHANGE FACTORY
