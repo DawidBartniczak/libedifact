@@ -69,53 +69,6 @@ edi_parser_t* edi_parser_create(edi_parser_params_t* params, size_t data_length)
     return parser;
 }
 
-edi_segment_t* edi_parser_next_segment(edi_parser_t* parser) {
-    if (parser->private->current_interchange->segment_count >= parser->private->allocated_segments) {
-        parser->private->allocated_segments += EDI_SEGMENT_CLUSTER_SIZE;
-        if ((parser->private->current_interchange->segments = realloc(parser->private->current_interchange->segments, sizeof(edi_segment_t) * parser->private->allocated_segments)) == NULL) {
-            return NULL;
-        }
-    }
-    parser->private->current_segment = parser->private->current_interchange->segments + parser->private->current_interchange->segment_count;
-    parser->private->current_interchange->segment_count++;
-    parser->private->allocated_elements = 0;
-    memset(parser->private->current_segment, 0, sizeof(edi_segment_t));
-
-    if (edi_parser_next_element(parser) == NULL) {
-        free(parser->private->current_segment);
-        return NULL;
-    }
-
-    return parser->private->current_segment;
-}
-
-edi_element_t* edi_parser_next_element(edi_parser_t* parser) {
-    if (parser->private->current_segment->element_count >= parser->private->allocated_elements) {
-        parser->private->allocated_elements += EDI_ELEMENT_CLUSTER_SIZE;
-        if ((parser->private->current_segment->elements = realloc(parser->private->current_segment->elements, sizeof(edi_element_t) * parser->private->allocated_elements)) == NULL) {
-            return NULL;
-        }
-    }
-    parser->private->current_element = parser->private->current_segment->elements + parser->private->current_segment->element_count;
-    parser->private->current_segment->element_count++;
-    parser->private->allocated_subelements = 0;
-    memset(parser->private->current_element, 0, sizeof(edi_element_t));
-
-    return parser->private->current_element;
-}
-
-char* edi_parser_next_subelement(edi_parser_t* parser) {
-    parser->private->allocated_subelements++;
-    if ((parser->private->current_element->subelements = realloc(parser->private->current_element->subelements, sizeof(char*) * parser->private->allocated_subelements)) == NULL) {
-        return NULL;
-    }
-    parser->private->current_subelement = (char*)(parser->private->current_element->subelements + parser->private->current_element->subelement_count);
-    parser->private->current_element->subelement_count++;
-    memset(parser->private->current_subelement, 0, sizeof(char *));
-
-    return parser->private->current_subelement;
-}
-
 void edi_parser_destroy(edi_parser_t* parser) {
     free(parser->private->buffer);
     free(parser->private);
@@ -134,11 +87,25 @@ edi_interchange_t* edi_interchange_create() {
     return interchange;
 }
 
-void edi_element_destroy(edi_element_t* element) {
-    for (size_t i = 0; i < element->subelement_count; i++) {
-        free(element->subelements[i]);
+void edi_interchange_destroy(edi_interchange_t* interchange) {
+    edi_segment_t* segment = interchange->segments;
+    for (size_t i = 0; i < interchange->segment_count; i++) {
+        edi_segment_destroy(&interchange->segments[i]);
     }
-    free(element->subelements);
+    free(interchange->segments);
+    free(interchange);
+}
+
+// SEGMENT FACTORY
+
+edi_segment_t* edi_segment_create() {
+    edi_segment_t* segment;
+
+    if((segment = (edi_segment_t *) calloc(1, sizeof(edi_segment_t))) == NULL) {
+        return NULL;
+    }
+
+    return segment;
 }
 
 void edi_segment_destroy(edi_segment_t* segment) {
@@ -148,11 +115,21 @@ void edi_segment_destroy(edi_segment_t* segment) {
     free(segment->elements);
 }
 
-void edi_interchange_destroy(edi_interchange_t* interchange) {
-    edi_segment_t* segment = interchange->segments;
-    for (size_t i = 0; i < interchange->segment_count; i++) {
-        edi_segment_destroy(&interchange->segments[i]);
+// ELEMENT FACTORY
+
+edi_element_t* edi_element_create() {
+    edi_element_t* element;
+
+    if((element = (edi_element_t *) calloc(1, sizeof(edi_element_t))) == NULL) {
+        return NULL;
     }
-    free(interchange->segments);
-    free(interchange);
+
+    return element;
+}
+
+void edi_element_destroy(edi_element_t* element) {
+    for (size_t i = 0; i < element->subelement_count; i++) {
+        free(element->subelements[i]);
+    }
+    free(element->subelements);
 }
