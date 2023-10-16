@@ -57,11 +57,5 @@
     edi_generator_t* edi_generator_create(edi_parser_params_t*);
     void edi_generator_destroy(edi_generator_t*);
 
-    edi_segment_t* edi_segment_create();
-    void edi_segment_destroy(edi_segment_t*);
-
-    edi_element_t* edi_element_create();
-    void edi_element_destroy(edi_element_t*);
-
     char* create_dynamic_string(char*, size_t);
 #endif

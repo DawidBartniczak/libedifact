@@ -125,6 +125,16 @@ edi_interchange_t* edi_interchange_create() {
     return interchange;
 }
 
+edi_interchange_t* edi_interchange_segment_add(edi_interchange_t* interchange, edi_segment_t* segment) {
+    if((interchange->segments = realloc(interchange->segments, sizeof(edi_segment_t) * (interchange->segment_count + 1))) == NULL) {
+        return NULL;
+    }
+    interchange->segments[interchange->segment_count] = *segment;
+    interchange->segment_count++;
+
+    return interchange;
+}
+
 void edi_interchange_destroy(edi_interchange_t* interchange) {
     edi_segment_t* segment = interchange->segments;
     for (size_t i = 0; i < interchange->segment_count; i++) {
@@ -146,6 +156,16 @@ edi_segment_t* edi_segment_create() {
     return segment;
 }
 
+edi_segment_t* edi_segment_element_add(edi_segment_t* segment, edi_element_t* element) {
+    if((segment->elements = realloc(segment->elements, sizeof(edi_element_t) * (segment->element_count + 1))) == NULL) {
+        return NULL;
+    }
+    segment->elements[segment->element_count] = *element;
+    segment->element_count++;
+
+    return segment;
+}
+
 void edi_segment_destroy(edi_segment_t* segment) {
     for (size_t i = 0; i < segment->element_count; i++) {
         edi_element_destroy(&segment->elements[i]);
@@ -161,6 +181,16 @@ edi_element_t* edi_element_create() {
     if((element = (edi_element_t *) calloc(1, sizeof(edi_element_t))) == NULL) {
         return NULL;
     }
+
+    return element;
+}
+
+edi_element_t* edi_element_subelement_add(edi_element_t* element, char* subelement) {
+    if((element->subelements = realloc(element->subelements, sizeof(char*) * (element->subelement_count + 1))) == NULL) {
+        return NULL;
+    }
+    element->subelements[element->subelement_count] = subelement;
+    element->subelement_count++;
 
     return element;
 }

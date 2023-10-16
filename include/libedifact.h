@@ -61,5 +61,15 @@
     PUBLISHED edi_interchange_t* edi_interchange_create();
     PUBLISHED void edi_interchange_destroy(edi_interchange_t*);
 
+    PUBLISHED edi_segment_t* edi_segment_create();
+    PUBLISHED void edi_segment_destroy(edi_segment_t*);
+
+    PUBLISHED edi_element_t* edi_element_create();
+    PUBLISHED void edi_element_destroy(edi_element_t*);
+
+    PUBLISHED edi_interchange_t* edi_interchange_segment_add(edi_interchange_t*, edi_segment_t*);
+    PUBLISHED edi_segment_t* edi_segment_element_add(edi_segment_t*, edi_element_t*);
+    PUBLISHED edi_element_t* edi_element_subelement_add(edi_element_t*, char*);
+
     PUBLISHED edi_parser_params_t* edi_parser_params_create(char, char, char, char, char);
 #endif
