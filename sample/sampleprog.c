@@ -1,8 +1,9 @@
 #include <stdio.h>
+#include <string.h>
 
 #include "libedifact.h"
 
-char* edi_data =    "UNA:+.! '"
+char* edi_data =    "UNA:+.? '"
                     "UNB+UNOC:3+30-051-2308:ZZ+yourDUNS:14+230417:1443+536'"
                     "UNH+1+ORDRSP:D:96A:UN'"
                     "BGM+231+2001710702'"
@@ -13,7 +14,7 @@ char* edi_data =    "UNA:+.! '"
                     "NAD+SU+30-051-2308::91'"
                     "NAD+BY+yourDUNS::91'"
                     "CUX+2:EUR:9'"
-                    "LIN+10++MXQ8-10-X2!'480:SA'"
+                    "LIN+10++MXQ8-10-X2?'480:SA'"
                     "PIA+1+03328262:BP'"
                     "QTY+12:2:PCE'"
                     "DTM+55:20230522:102'"
@@ -54,6 +55,10 @@ int main(int argc, char** argv){
         }
     }
 
+    char* generated_edi = edi_generate(NULL, edi_interchange);
+    printf("\n%s %s %d\n", edi_data, generated_edi, strcmp(edi_data, generated_edi));
+
     edi_interchange_destroy(edi_interchange);
+    free(generated_edi);
     return 0;
 }
