@@ -195,6 +195,16 @@ edi_element_t* edi_element_subelement_add(edi_element_t* element, char* subeleme
     return element;
 }
 
+edi_element_t* edi_element_subelement_add_copy(edi_element_t* element, char* subelement, size_t subelement_length) {
+    if((element->subelements = realloc(element->subelements, sizeof(char*) * (element->subelement_count + 1))) == NULL) {
+        return NULL;
+    }
+    element->subelements[element->subelement_count] = create_dynamic_string(subelement, subelement_length);
+    element->subelement_count++;
+
+    return element;
+}
+
 void edi_element_destroy(edi_element_t* element) {
     for (size_t i = 0; i < element->subelement_count; i++) {
         free(element->subelements[i]);
